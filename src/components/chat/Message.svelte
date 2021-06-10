@@ -1,5 +1,13 @@
 <script lang="ts">
     export let message;
+
+    function formatDate(date: Date): string {
+        return Intl.DateTimeFormat('en', {
+            hour12: false,
+            hour: '2-digit',
+            minute: '2-digit',
+        }).format(date);
+    }
 </script>
 
 <section class="pt-2">
@@ -9,7 +17,7 @@
                 <img class="rounded-md p-1" src="{ message.attachment.src }" alt="{ message.attachment.type }">
             {/if}
             <h1 class="px-3">{ message.message }</h1>
-            <p class="text-right text-xs text-gray-500 p-1"> { message.timestamp }</p>
+            <p class="text-right text-xs text-gray-500 p-1"> { formatDate(message.timestamp) }</p>
         </div>
     </article>
 </section>

@@ -1,31 +1,21 @@
 <script lang="ts">
-    import { messages } from '~/stores/chat.store';
+    
     import Message from './Message.svelte';
     import { beforeUpdate, afterUpdate } from 'svelte';
 
     let newMessage: string = '';
     let timeline : HTMLElement;
-    let autoscroll;
+    let hasAutoscrolled: boolean;
 
     beforeUpdate(() => {
-        autoscroll = timeline && (timeline.offsetHeight + timeline.scrollTop) > (timeline.scrollHeight - 20);
+        hasAutoscrolled = timeline && (timeline.offsetHeight + timeline.scrollTop) > (timeline.scrollHeight - 20);
     });
 
     afterUpdate(() => {
-        if (autoscroll) {
+        if (hasAutoscrolled) {
             timeline.scrollTo(0, timeline.scrollHeight);
         }
-    })
-
-    function sendMessage(newMessage: string) {
-        $messages = [...$messages, {
-            id: 123,
-            recipient: 223,
-            message: newMessage,
-            timestamp: new Date(),
-            }
-        ];
-    }
+    });
 
     function sendKeyHandler(event) {
         if (event.key === 'Enter') {
@@ -34,7 +24,7 @@
                 return;
             }
 
-            sendMessage(text);
+            //messages.sendMessage(text);
 
             event.target.value = '';
         }
@@ -64,7 +54,7 @@
             <Message message="{ chat }"></Message>
         {/each}
     </section>
-    <footer class="flex flex-row  items-center  bottom-0 my-2 w-full">
+    <footer class="flex flex-row items-center bottom-0 my-2 w-full">
         <div class="ml-2 flex flex-row border-gray items-center w-full border rounded-3xl h-12 px-2">
             <button class="focus:outline-none flex items-center justify-center h-10 w-10 hover:text-red-600 text-red-400 ml-1">
                 <span class="material-icons px-2">mic</span>
@@ -92,7 +82,7 @@
             <div class="ml-3 mr-2">
                 <button
                     id="other"
-                    on:click={() => sendMessage(newMessage) }
+                    on:click={() => messages.sendMessage(newMessage) }
                     class="flex items-center justify-center h-10 w-10 rounded-full  hover:text-blue-900 text-blue-500 text-white focus:outline-none">
                     <span class="material-icons px-2">send</span>
               </button>

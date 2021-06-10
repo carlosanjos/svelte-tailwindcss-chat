@@ -1,11 +1,14 @@
+import type { AttachmentType } from "~/enum/attachment.enum";
+
 export interface MessageInterface {
-    id: number;
-    recipient: number; //a user in the future
+    id: string;
+    //recipient: UserInterface;
     message: string;
     timestamp: Date;
+    readAt: Date;
     attachment?: {
         id: number;
         src: string;
-        type: string;
+        type: AttachmentType;
     };
 }
