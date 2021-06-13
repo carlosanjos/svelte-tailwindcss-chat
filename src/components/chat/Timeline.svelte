@@ -1,11 +1,25 @@
 <script lang="ts">
-    
     import Message from './Message.svelte';
     import { beforeUpdate, afterUpdate } from 'svelte';
+    import { messages } from "~/stores/chat.store";
+    import { profile } from "~/stores/profile.store";
 
     let newMessage: string = '';
     let timeline : HTMLElement;
     let hasAutoscrolled: boolean;
+    export let contact;
+
+    $: contactMessages = $messages.filter(message => (message.sender === $profile && message.recipient === contact.profile)
+        || (message.recipient === $profile && message.sender === contact.profile)
+    );
+
+    function formatDate(date: Date): string {
+        return Intl.DateTimeFormat('en', {
+            hour12: false,
+            hour: '2-digit',
+            minute: '2-digit',
+        }).format(date);
+    }
 
     beforeUpdate(() => {
         hasAutoscrolled = timeline && (timeline.offsetHeight + timeline.scrollTop) > (timeline.scrollHeight - 20);
@@ -17,16 +31,27 @@
         }
     });
 
+    function sendNewMessage() {
+        $messages = [...$messages, {
+            sender: $profile,
+            readAt: null,
+            recipient: contact.profile,
+            timestamp: new Date(),
+            message: newMessage,
+        }];
+    }
+
     function sendKeyHandler(event) {
         if (event.key === 'Enter') {
-            const text = event.target.value;
-            if (!text) {
+            newMessage = event.target.value;
+            if (!newMessage) {
                 return;
             }
 
-            //messages.sendMessage(text);
+            sendNewMessage();
 
             event.target.value = '';
+            newMessage = ''
         }
     }
 </script>
@@ -36,11 +61,11 @@
         <div class="flex p-2">
             <span class="material-icons text-white py-4">west</span>
             <div class="px-2">
-                <img class="w-12 h-12 rounded-full" src="https://images.unsplash.com/photo-1438761681033-6461ffad8d80" alt="avatar">
+                <img class="w-12 h-12 rounded-full" src={ contact.profile.avatar } alt="avatar">
             </div>
             <div class="px-2">
-                <h2>Lara Croft</h2>
-                <p class="text-xs">Last seen at Yesterday</p>
+                <h2>{ contact.profile.displayName }</h2>
+                <p class="text-xs">Last seen at { formatDate(contact.profile.lastOnline) }</p>
             </div>
         </div>
         <div class="py-5">
@@ -50,7 +75,7 @@
     </header>
 
     <section class="flex-grow overflow-y-auto" bind:this={ timeline }>
-        {#each $messages as chat}
+        {#each contactMessages as chat}
             <Message message="{ chat }"></Message>
         {/each}
     </section>
@@ -82,7 +107,7 @@
             <div class="ml-3 mr-2">
                 <button
                     id="other"
-                    on:click={() => messages.sendMessage(newMessage) }
+                    on:click={ sendNewMessage }
                     class="flex items-center justify-center h-10 w-10 rounded-full  hover:text-blue-900 text-blue-500 text-white focus:outline-none">
                     <span class="material-icons px-2">send</span>
               </button>
